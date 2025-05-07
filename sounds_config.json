@@ -1,0 +1,7 @@
+{
+    "a": "click_a.wav",
+    "b": "click_b.wav",
+    "space": "space_click.wav",
+    "enter": "enter_click.wav",
+    "c": "custom_sound_c.wav"
+}
