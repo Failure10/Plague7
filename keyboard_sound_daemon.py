@@ -2,18 +2,13 @@ import os
 import json
 import keyboard
 import pygame
-import threading
+import daemon
 
 # Initialize pygame mixer for playing sounds
 pygame.mixer.init()
 
-# Directory where sound files are stored
 SOUND_DIRECTORY = "sounds"
-
-# Path to the sound configuration file
 CONFIG_FILE = "sounds_config.json"
-
-# Default sound for keys not mapped
 DEFAULT_SOUND = "default_click.wav"
 
 def load_sound_mapping():
@@ -35,38 +30,24 @@ def play_sound(key, sound_mapping):
     if os.path.exists(sound_path):
         pygame.mixer.Sound(sound_path).play()
     else:
-        print(f"Sound file {sound_file} not found!")
+        print(f"Sound file '{sound_file}' not found!")
 
-def background_listener(sound_mapping):
+def background_listener():
     """
-    Listen to keyboard events in the background.
+    Listen to keyboard events and play sounds in the background.
     """
-    print("Keyboard sound app is running in the background. Press keys to hear sounds!")
-    print("Press ESC to exit.")
-
+    sound_mapping = load_sound_mapping()
+    print("Keyboard sound app is now running in the background.")
     for key in sound_mapping.keys():
         keyboard.on_press_key(key, lambda _, k=key: play_sound(k, sound_mapping))
-
-    # Keep the listener running until 'esc' is pressed
     keyboard.wait("esc")
-    print("Exiting program.")
 
-def main():
+def run_daemon():
     """
-    Main function to launch the background listener.
+    Run the background listener as a daemon process.
     """
-    # Load the key-to-sound mapping
-    sound_mapping = load_sound_mapping()
-
-    # Run the listener in a background thread
-    listener_thread = threading.Thread(target=background_listener, args=(sound_mapping,))
-    listener_thread.daemon = True  # Ensures the thread exits when the main program exits
-    listener_thread.start()
-
-    # Keep the main program alive
-    while True:
-        pass
+    with daemon.DaemonContext():
+        background_listener()
 
 if __name__ == "__main__":
-    main()
-    
+    run_daemon()pip install python-daemon
